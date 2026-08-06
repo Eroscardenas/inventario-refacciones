@@ -1,16 +1,29 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+
 import { AppModule } from './app.module';
 
-// iniciando la aplicacion usando el modulo principal de la aplicacion
+// inicia la aplicacion usando el modulo principal.
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  //usamos el puerto en el env o el puerto 3000
+  // agrega /api al inicio de todas las rutas.
+  app.setGlobalPrefix('api');
+
+  // valida los datos recibidos por la API.
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
+
+  // usa el puerto del .env o el 3000 como respaldo.
   await app.listen(process.env.PORT ?? 3000);
 }
-//captura el error que pudiera existir al inicializar
+
+// captura errores al iniciar el servidor.
 bootstrap().catch((error: unknown) => {
   console.error('No se pudo iniciar la aplicación:', error);
-  //finaliza el proceso indicando el error
   process.exit(1);
 });
