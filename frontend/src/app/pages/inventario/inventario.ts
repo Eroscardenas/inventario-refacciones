@@ -2,12 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
+import Toastify from 'toastify-js';
 
 import { RefaccionForm } from '../../components/refaccion-form/refaccion-form';
 import { RefaccionTable } from '../../components/refaccion-table/refaccion-table';
 import { Refaccion } from '../../models/refaccion.model';
 import { RefaccionesService } from '../../services/refacciones.service';
 
+// seleccionamos la refaccion a editar o eliminar, y abre el formulario.
 @Component({
   selector: 'app-inventario',
   imports: [
@@ -18,53 +20,55 @@ import { RefaccionesService } from '../../services/refacciones.service';
   ],
   templateUrl: './inventario.html',
 })
+// Pantalla principal del inventario de refacciones inicializando componentes y cargando la lista de refacciones.
 export class Inventario implements OnInit {
   refacciones: Refaccion[] = [];
   refaccionSeleccionada: Refaccion | null = null;
+  refaccionAEliminar: Refaccion | null = null;
 
   buscar = '';
   categoria = '';
 
   cargando = false;
   guardando = false;
-  mostrarFormulario = false;
+  eliminando = false;
 
-  mensaje = '';
-  error = '';
+  mostrarFormulario = false;
+  mostrarConfirmacion = false;
 
   constructor(private readonly refaccionesService: RefaccionesService) {}
 
-  // Carga las refacciones al abrir la pantalla.
+  // carga las refacciones al abrir la pantalla al iniciar el componente.
   ngOnInit(): void {
     this.cargarRefacciones();
   }
 
-  // Consulta las refacciones usando los filtros actuales.
+  // consulta las refacciones con los filtros de busqueda y categoria
   cargarRefacciones(): void {
     this.cargando = true;
-    this.error = '';
 
     this.refaccionesService
       .getAll(this.buscar.trim(), this.categoria.trim())
       .pipe(
         finalize(() => {
-          console.log('GET finalizado');
           this.cargando = false;
         }),
       )
+      // obtiene la lista de refacciones y maneja errores en caso de fallo.
       .subscribe({
         next: (refacciones) => {
-          console.log('GET recibido', refacciones);
           this.refacciones = refacciones;
         },
-        error: (respuesta) => {
-          console.error('Error al cargar refacciones', respuesta);
-          this.error = 'No se pudieron cargar las refacciones.';
+        error: () => {
+          this.mostrarToast(
+            'No se pudieron cargar las refacciones.',
+            'error',
+          );
         },
       });
   }
 
-  // Suma todas las piezas disponibles.
+  // suma todas las piezas disponibles.
   get totalPiezas(): number {
     return this.refacciones.reduce(
       (total, refaccion) => total + refaccion.stock,
@@ -72,35 +76,26 @@ export class Inventario implements OnInit {
     );
   }
 
-  // Cuenta las refacciones con cinco piezas o menos.
-  get stockBajo(): number {
-    return this.refacciones.filter(
-      (refaccion) => refaccion.stock <= 5,
-    ).length;
-  }
-
-  // Limpia los filtros y vuelve a cargar la lista.
+  // limpiamos los filtros y carga nuevamente la lista
   limpiarFiltros(): void {
     this.buscar = '';
     this.categoria = '';
     this.cargarRefacciones();
   }
 
-  // Abre el formulario para crear una refacción.
+  // abrimos el formulario para registrar una refaccion
   abrirFormulario(): void {
-    this.limpiarMensajes();
     this.refaccionSeleccionada = null;
     this.mostrarFormulario = true;
   }
 
-  // Abre el formulario con los datos de la refacción seleccionada.
+  // abrimos el formulario con los datos de la refaccion para ahora editar
   editarRefaccion(refaccion: Refaccion): void {
-    this.limpiarMensajes();
     this.refaccionSeleccionada = refaccion;
     this.mostrarFormulario = true;
   }
 
-  // Cierra el formulario.
+  // cerramos  el formulario
   cerrarFormulario(): void {
     if (this.guardando) {
       return;
@@ -110,21 +105,13 @@ export class Inventario implements OnInit {
     this.refaccionSeleccionada = null;
   }
 
-  // Crea o actualiza según exista una refacción seleccionada.
+  // decidir si se crea o actualiza la refaccion
   guardarRefaccion(
     formulario: Omit<Refaccion, 'id'>,
   ): void {
-    console.log('1 - Inventario recibió guardar');
-
-    this.limpiarMensajes();
     this.guardando = true;
 
     if (this.refaccionSeleccionada) {
-      console.log(
-        '2 - Se enviará actualización',
-        this.refaccionSeleccionada.id,
-      );
-
       this.actualizarRefaccion(
         this.refaccionSeleccionada.id,
         formulario,
@@ -133,76 +120,93 @@ export class Inventario implements OnInit {
       return;
     }
 
-    console.log('2 - Se enviará creación');
-
     this.crearRefaccion(formulario);
   }
 
-  // Elimina una refacción después de confirmar.
+  // abrimos la confirmacion antes de eliminar una refaccion
   eliminarRefaccion(refaccion: Refaccion): void {
-    const confirmado = window.confirm(
-      `¿Deseas eliminar la refacción "${refaccion.nombre}"?`,
-    );
+    this.refaccionAEliminar = refaccion;
+    this.mostrarConfirmacion = true;
+  }
 
-    if (!confirmado) {
+  // cerramos la confirmacion sin eliminar la refaccion
+  cancelarEliminacion(): void {
+    if (this.eliminando) {
       return;
     }
 
-    this.limpiarMensajes();
-
-    this.refaccionesService.delete(refaccion.id).subscribe({
-      next: () => {
-        this.refacciones = this.refacciones.filter(
-          (registro) => registro.id !== refaccion.id,
-        );
-
-        this.mensaje = 'Refacción eliminada correctamente.';
-      },
-      error: (respuesta) => {
-        console.error('Error al eliminar', respuesta);
-
-        this.mostrarError(
-          respuesta,
-          'No se pudo eliminar la refacción.',
-        );
-      },
-    });
+    this.mostrarConfirmacion = false;
+    this.refaccionAEliminar = null;
   }
 
-  // Registra una nueva refacción.
+  // confirmamos y eliminamos la refaccion seleccionada
+  confirmarEliminacion(): void {
+    if (!this.refaccionAEliminar) {
+      return;
+    }
+
+    const refaccion = this.refaccionAEliminar;
+
+    this.eliminando = true;
+
+    // azctualizamos la lista de refacciones
+    this.refaccionesService
+      .delete(refaccion.id)
+      .pipe(
+        finalize(() => {
+          this.eliminando = false;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.refacciones = this.refacciones.filter(
+            (registro) => registro.id !== refaccion.id,
+          );
+
+          this.mostrarConfirmacion = false;
+          this.refaccionAEliminar = null;
+
+          this.mostrarToast(
+            'Refacción eliminada correctamente.',
+            'success',
+          );
+        },
+        error: (respuesta) => {
+          this.mostrarError(
+            respuesta,
+            'No se pudo eliminar la refacción.',
+          );
+        },
+      });
+  }
+
+  // fx para crear una nueva refaccion y actualizar la lista de refacciones
   private crearRefaccion(
     formulario: Omit<Refaccion, 'id'>,
   ): void {
-    console.log('3 - Antes del POST');
-
     this.refaccionesService
       .create(formulario)
       .pipe(
         finalize(() => {
-          console.log('5 - POST finalizado');
-
           this.guardando = false;
         }),
       )
       .subscribe({
         next: (refaccionCreada) => {
-          console.log(
-            '4 - POST respondió correctamente',
-            refaccionCreada,
-          );
-
           this.refacciones = [
             ...this.refacciones,
             refaccionCreada,
           ];
 
-          this.mensaje = 'Refacción registrada correctamente.';
           this.mostrarFormulario = false;
           this.refaccionSeleccionada = null;
+
+          this.mostrarToast(
+            'Refacción registrada correctamente.',
+            'success',
+          );
         },
         error: (respuesta) => {
-          console.error('POST falló', respuesta);
-
           this.mostrarError(
             respuesta,
             'No se pudo registrar la refacción.',
@@ -211,29 +215,21 @@ export class Inventario implements OnInit {
       });
   }
 
-  // Actualiza una refacción existente.
+  // fx para actualizar una refaccion que ya existe
   private actualizarRefaccion(
     id: number,
     formulario: Omit<Refaccion, 'id'>,
   ): void {
-    console.log('3 - Antes del PUT');
-
     this.refaccionesService
       .update(id, formulario)
       .pipe(
         finalize(() => {
-          console.log('5 - PUT finalizado');
-
           this.guardando = false;
         }),
       )
+      //y actualizamos la lista de refacciones con la refaccion actualizada
       .subscribe({
         next: (refaccionActualizada) => {
-          console.log(
-            '4 - PUT respondió correctamente',
-            refaccionActualizada,
-          );
-
           this.refacciones = this.refacciones.map(
             (refaccion) =>
               refaccion.id === id
@@ -241,13 +237,15 @@ export class Inventario implements OnInit {
                 : refaccion,
           );
 
-          this.mensaje = 'Refacción actualizada correctamente.';
           this.mostrarFormulario = false;
           this.refaccionSeleccionada = null;
+
+          this.mostrarToast(
+            'Refacción actualizada correctamente.',
+            'success',
+          );
         },
         error: (respuesta) => {
-          console.error('PUT falló', respuesta);
-
           this.mostrarError(
             respuesta,
             'No se pudo actualizar la refacción.',
@@ -256,7 +254,7 @@ export class Inventario implements OnInit {
       });
   }
 
-  // Obtiene el mensaje enviado por el backend.
+  // mostramos el manejo de errores en caso de fallo en la peticion http
   private mostrarError(
     respuesta: {
       error?: {
@@ -267,14 +265,29 @@ export class Inventario implements OnInit {
   ): void {
     const mensaje = respuesta.error?.message;
 
-    this.error = Array.isArray(mensaje)
+    const texto = Array.isArray(mensaje)
       ? mensaje.join(', ')
       : mensaje || mensajePredeterminado;
+
+    this.mostrarToast(texto, 'error');
   }
 
-  // Limpia los mensajes anteriores.
-  private limpiarMensajes(): void {
-    this.mensaje = '';
-    this.error = '';
+  // Muestra una notificación de éxito o error.
+  private mostrarToast(
+    mensaje: string,
+    tipo: 'success' | 'error',
+  ): void {
+    Toastify({
+      text: mensaje,
+      duration: 3000,
+      close: true,
+      gravity: 'top',
+      position: 'right',
+      stopOnFocus: true,
+      className:
+        tipo === 'success'
+          ? 'toast-success'
+          : 'toast-error',
+    }).showToast();
   }
 }

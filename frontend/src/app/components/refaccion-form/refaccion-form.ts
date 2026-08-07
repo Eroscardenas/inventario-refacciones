@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
 import { Refaccion } from '../../models/refaccion.model';
 
+// Formulario para crear o editar una refacción.
 @Component({
   selector: 'app-refaccion-form',
   imports: [FormsModule],
@@ -12,13 +12,14 @@ export class RefaccionForm implements OnChanges {
   @Input() abierto = false;
   @Input() guardando = false;
   @Input() refaccion: Refaccion | null = null;
+  @Input() categorias: string[] = [];
 
   @Output() guardar = new EventEmitter<Omit<Refaccion, 'id'>>();
   @Output() cerrar = new EventEmitter<void>();
 
   formulario: Omit<Refaccion, 'id'> = this.crearFormularioVacio();
 
-  // Carga los datos cuando se edita una refacción.
+  // se cargan los datos cuando se edita una refaccion
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['refaccion']) {
       return;
@@ -39,7 +40,7 @@ export class RefaccionForm implements OnChanges {
     this.formulario = this.crearFormularioVacio();
   }
 
-  // Envía los datos del formulario.
+  // se valida el formulario con los campos requeridos
   enviarFormulario(): void {
     if (!this.formularioValido()) {
       return;
@@ -54,7 +55,7 @@ export class RefaccionForm implements OnChanges {
     });
   }
 
-  // Solicita cerrar el formulario.
+  // cerrar el formulario y limpiar los datos
   cancelar(): void {
     this.cerrar.emit();
   }
@@ -73,7 +74,7 @@ export class RefaccionForm implements OnChanges {
       Number(this.formulario.stock) >= 0
     );
   }
-
+// crea un formulario vacio para registrar una nueva refaccion
   private crearFormularioVacio(): Omit<Refaccion, 'id'> {
     return {
       nombre: '',

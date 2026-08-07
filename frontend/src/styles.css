@@ -1,3 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+@import 'toastify-js/src/toastify.css';
+.toast-success {
+  background: #17c0d3 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 25%) !important;
+}
+
+.toast-error {
+  background: #dc4600 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 25%) !important;
+}

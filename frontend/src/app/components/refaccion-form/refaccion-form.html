@@ -4,16 +4,16 @@
     aria-label="Cerrar formulario"
     (click)="cancelar()"
     [disabled]="guardando"
-    class="fixed inset-0 z-40 cursor-default bg-slate-950/75 backdrop-blur-sm disabled:cursor-wait"
+    class="fixed inset-0 z-40 cursor-default bg-slate-950/75 backdrop-blur-sm transition-opacity duration-300 disabled:cursor-wait"
   ></button>
 
   <aside
-    class="fixed right-0 top-0 z-50 h-full w-full max-w-md overflow-y-auto border-l border-slate-800 bg-slate-900 p-6 text-slate-100 shadow-2xl"
+    class="fixed right-0 top-0 z-50 h-full w-full max-w-md overflow-y-auto border-l border-slate-800 bg-slate-900 p-6 text-slate-100 shadow-2xl transition-transform duration-300 ease-out"
   >
     <header class="mb-7 flex items-start justify-between gap-4">
       <div>
         <p
-          class="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-400"
+          class="text-xs font-semibold uppercase tracking-[0.25em] text-purple-400"
         >
           {{ esEdicion ? 'Actualización' : 'Registro' }}
         </p>
@@ -60,7 +60,7 @@
           autocomplete="off"
           [disabled]="guardando"
           [(ngModel)]="formulario.nombre"
-          class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition placeholder:text-slate-600 focus:border-cyan-400 disabled:cursor-wait disabled:opacity-60"
+          class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition placeholder:text-slate-600 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/10 disabled:cursor-wait disabled:opacity-60"
           placeholder="Ej. Filtro de aceite"
         />
       </div>
@@ -82,7 +82,7 @@
           autocomplete="off"
           [disabled]="guardando"
           [(ngModel)]="formulario.sku"
-          class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 uppercase outline-none transition placeholder:text-slate-600 focus:border-cyan-400 disabled:cursor-wait disabled:opacity-60"
+          class="uppercase w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition placeholder:text-slate-600 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/10 disabled:cursor-wait disabled:opacity-60"
           placeholder="Ej. FIL-001"
         />
       </div>
@@ -96,17 +96,24 @@
         </label>
 
         <input
-          id="categoria"
-          name="categoria"
-          type="text"
-          required
-          maxlength="80"
-          autocomplete="off"
-          [disabled]="guardando"
-          [(ngModel)]="formulario.categoria"
-          class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition placeholder:text-slate-600 focus:border-cyan-400 disabled:cursor-wait disabled:opacity-60"
-          placeholder="Ej. Motor"
-        />
+            id="categoria"
+            name="categoria"
+            type="text"
+            list="categoriasRegistradas"
+            required
+            maxlength="80"
+            autocomplete="off"
+           [disabled]="guardando"
+           [(ngModel)]="formulario.categoria"
+           class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition placeholder:text-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 disabled:cursor-wait disabled:opacity-60"
+           placeholder="Ej. Motor"
+/>
+
+        <datalist id="categoriasRegistradas">
+            @for (categoria of categorias; track categoria) {
+  <option [value]="categoria"></option>
+  }
+      </datalist>
       </div>
 
       <div class="grid grid-cols-2 gap-4">
@@ -127,7 +134,7 @@
             required
             [disabled]="guardando"
             [(ngModel)]="formulario.precio"
-            class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition focus:border-cyan-400 disabled:cursor-wait disabled:opacity-60"
+            class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-400/10 disabled:cursor-wait disabled:opacity-60"
           />
         </div>
 
@@ -148,7 +155,7 @@
             required
             [disabled]="guardando"
             [(ngModel)]="formulario.stock"
-            class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition focus:border-cyan-400 disabled:cursor-wait disabled:opacity-60"
+            class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-400/10 disabled:cursor-wait disabled:opacity-60"
           />
         </div>
       </div>
@@ -157,7 +164,7 @@
         <button
           type="submit"
           [disabled]="guardando"
-          class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-wait disabled:opacity-70"
+          class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-purple-400 px-5 py-3 font-semibold text-slate-950 transition duration-200 hover:-translate-y-0.5 hover:bg-purple-300 hover:shadow-lg hover:shadow-purple-400/10 active:translate-y-0 disabled:cursor-wait disabled:opacity-70"
         >
           @if (guardando) {
             <span
@@ -178,7 +185,7 @@
           type="button"
           (click)="cancelar()"
           [disabled]="guardando"
-          class="rounded-xl border border-slate-700 px-5 py-3 font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white disabled:cursor-wait disabled:opacity-60"
+          class="rounded-xl border border-slate-700 px-5 py-3 font-semibold text-slate-300 transition hover:border-slate-500 hover:bg-slate-800 hover:text-white disabled:cursor-wait disabled:opacity-60"
         >
           Cancelar
         </button>
