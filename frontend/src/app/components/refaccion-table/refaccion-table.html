@@ -1,0 +1,116 @@
+@if (cargando) {
+  <div class="p-12 text-center">
+    <div
+      class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-slate-700 border-t-cyan-400"
+    ></div>
+
+    <p class="mt-4 text-sm text-slate-400">
+      Cargando refacciones...
+    </p>
+  </div>
+} @else if (refacciones.length === 0) {
+  <div class="p-12 text-center">
+    <div
+      class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-800 text-xl font-semibold text-slate-400"
+    >
+      0
+    </div>
+
+    <p class="mt-4 text-lg font-semibold text-slate-200">
+      No hay refacciones registradas
+    </p>
+
+    <p class="mt-2 text-sm text-slate-400">
+      Registra una refacción o modifica los filtros.
+    </p>
+  </div>
+} @else {
+  <div class="overflow-x-auto">
+    <table class="min-w-full">
+      <thead class="bg-slate-800/60">
+        <tr>
+          <th class="px-5 py-4 text-left text-sm font-semibold text-slate-300">
+            Nombre
+          </th>
+
+          <th class="px-5 py-4 text-left text-sm font-semibold text-slate-300">
+            SKU
+          </th>
+
+          <th class="px-5 py-4 text-left text-sm font-semibold text-slate-300">
+            Categoría
+          </th>
+
+          <th class="px-5 py-4 text-right text-sm font-semibold text-slate-300">
+            Precio
+          </th>
+
+          <th class="px-5 py-4 text-center text-sm font-semibold text-slate-300">
+            Stock
+          </th>
+
+          <th class="px-5 py-4 text-right text-sm font-semibold text-slate-300">
+            Acciones
+          </th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-slate-800">
+        @for (refaccion of refacciones; track refaccion.id) {
+          <tr
+            class="transition duration-200 hover:bg-slate-800/40"
+            [class.bg-red-950/10]="refaccion.stock <= 5"
+          >
+            <td class="px-5 py-4 font-medium text-slate-100">
+              {{ refaccion.nombre }}
+            </td>
+
+            <td class="px-5 py-4 text-sm text-slate-400">
+              {{ refaccion.sku }}
+            </td>
+
+            <td class="px-5 py-4 text-sm text-slate-400">
+              {{ refaccion.categoria }}
+            </td>
+
+            <td class="px-5 py-4 text-right text-slate-200">
+              {{ +refaccion.precio | currency: 'MXN' }}
+            </td>
+
+            <td class="px-5 py-4 text-center">
+              <span
+                class="inline-flex min-w-12 justify-center rounded-full px-3 py-1 text-sm font-semibold"
+                [class.bg-red-500/15]="refaccion.stock <= 5"
+                [class.text-red-300]="refaccion.stock <= 5"
+                [class.bg-emerald-500/15]="refaccion.stock > 5"
+                [class.text-emerald-300]="refaccion.stock > 5"
+              >
+                {{ refaccion.stock }}
+              </span>
+            </td>
+
+            <td class="px-5 py-4">
+              <div class="flex justify-end gap-2">
+                <button
+                  type="button"
+                  (click)="seleccionarEdicion(refaccion)"
+                  class="rounded-lg border border-amber-500/30 px-3 py-1.5 text-sm font-medium text-amber-300 transition hover:border-amber-400 hover:bg-amber-500/10"
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  (click)="seleccionarEliminacion(refaccion)"
+                  class="rounded-lg border border-red-500/30 px-3 py-1.5 text-sm font-medium text-red-300 transition hover:border-red-400 hover:bg-red-500/10"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
