@@ -1,29 +1,26 @@
 # Inventario de Refacciones
 
-Sistema web para la administración de inventario de refacciones desarrollado como una arquitectura cliente-servidor utilizando **Angular 21**, **NestJS**, **PostgreSQL** y **Docker**.
+Microservicio web para la administración de inventario de refacciones desarrollado como una arquitectura client-server utilizando **Angular 21**, **NestJS**, **PostgreSQL** y **Docker**.
 
-La aplicación permite administrar el inventario mediante operaciones CRUD, ofreciendo una interfaz moderna y una API REST desacoplada para la gestión de los datos.
+La aplicación permite administrar el inventario mediante operaciones CRUD, ofreciendo una interfaz UI y UX y una API REST desacoplada para la gestión correcta de los datos.
 
 ---
 
 # Tecnologías utilizadas
 
-## Frontend
+### Frontend
 
-- Angular 21
+- Angular 
 - TypeScript
 - Tailwind CSS
-- Toastify JS
 
-## Backend
+### Backend
 
 - NestJS
 - TypeORM
 - PostgreSQL
-- class-validator
-- class-transformer
 
-## Infraestructura
+### Infraestructura
 
 - Docker
 - Docker Compose
@@ -31,24 +28,13 @@ La aplicación permite administrar el inventario mediante operaciones CRUD, ofre
 
 ---
 
-# Arquitectura del sistema
-
-```text
-                 Angular 21
-                      │
-                      │ HTTP
-                      ▼
-               NestJS REST API
-                      │
-                  TypeORM ORM
-                      │
-                      ▼
-                PostgreSQL 16
-```
+## Arquitectura del sistema
+                             HTTP
+                 Angular 21  ===>  NestJS REST API  ===>   TypeORM ORM   ===>   PostgreSQL 16
 
 ---
 
-# Funcionalidades implementadas
+## Funcionalidades implementadas
 
 - Registro de nuevas refacciones.
 - Consulta del inventario.
@@ -58,8 +44,6 @@ La aplicación permite administrar el inventario mediante operaciones CRUD, ofre
 - Filtrado por categoría.
 - Validación de datos en cliente y servidor.
 - Control de stock.
-- Indicador visual de stock bajo.
-- Notificaciones visuales mediante Toastify.
 - Persistencia de datos en PostgreSQL.
 - API REST desarrollada con NestJS.
 - Contenedorización completa mediante Docker.
@@ -81,8 +65,6 @@ Ambas aplicaciones se comunican mediante una API REST.
 
 ## Persistencia de datos
 
-La aplicación utiliza PostgreSQL como gestor de base de datos.
-
 El acceso a los datos se realiza mediante **TypeORM**, permitiendo trabajar con entidades y repositorios sin escribir consultas SQL para las operaciones básicas.
 
 Los identificadores de cada refacción son administrados automáticamente por PostgreSQL mediante `@PrimaryGeneratedColumn()`.
@@ -96,7 +78,7 @@ La configuración del backend se realiza mediante variables de entorno utilizand
 - `@nestjs/config`
 - `@nestjs/typeorm`
 
-Esto permite desacoplar la configuración del código fuente y facilitar el despliegue en distintos entornos.
+Esto permite separar la configuración del código fuente y facilitar el despliegue en distintos entornos.
 
 ---
 
@@ -107,7 +89,7 @@ Las solicitudes recibidas por el backend son validadas utilizando:
 - class-validator
 - class-transformer
 
-Se valida, entre otros aspectos:
+Tambien se valida:
 
 - Nombre obligatorio.
 - SKU obligatorio.
@@ -121,38 +103,19 @@ Se valida, entre otros aspectos:
 El frontend y el backend se ejecutan en puertos distintos.
 
 ```
-Angular
-http://localhost:4200
+Angular                          NestJS                               PostgreSQL                    
+http://localhost:4200     ==>   http://localhost:3000/api    ==>   
 
-↓
-
-NestJS
-http://localhost:3000/api
-
-↓
-
-PostgreSQL
 ```
 
 Para permitir la comunicación entre ambas aplicaciones se habilitó CORS únicamente para el frontend autorizado.
 
 ---
 
-## Optimización del renderizado
 
-La tabla del inventario utiliza la nueva sintaxis de Angular:
+## SSR (Server Side Rendering)
 
-```ts
-@for (refaccion of refacciones; track refaccion.id)
-```
-
-Esto permite que Angular actualice únicamente las filas modificadas en lugar de volver a renderizar toda la tabla.
-
----
-
-## Server Side Rendering
-
-Durante la creación del proyecto **no** se habilitó Server Side Rendering (SSR), ya que se trata de una aplicación interna orientada a la administración del inventario y no requiere posicionamiento SEO ni generación de contenido estático.
+Durante la creación del proyecto **no** se habilitó  SSR, ya que se trata de una aplicación interna orientada a la administración del inventario y no requiere posicionamiento SEO ni generación de contenido estático.
 
 ---
 
@@ -160,10 +123,9 @@ Durante la creación del proyecto **no** se habilitó Server Side Rendering (SSR
 
 Durante el desarrollo se siguieron los siguientes criterios:
 
-- Arquitectura cliente-servidor.
 - Separación entre frontend y backend.
 - Organización modular del backend.
-- Componentes reutilizables en Angular.
+- Componentes reutilizables en Angular como en React.
 - Validaciones tanto en cliente como en servidor.
 - Persistencia mediante PostgreSQL.
 - Configuración mediante variables de entorno.
@@ -172,7 +134,7 @@ Durante el desarrollo se siguieron los siguientes criterios:
 
 ---
 
-# Requisitos
+## Requisitos
 
 Para ejecutar el proyecto únicamente es necesario tener instalado:
 
@@ -181,12 +143,12 @@ Para ejecutar el proyecto únicamente es necesario tener instalado:
 
 ---
 
-# Instalación
+## Instalación
 
 Clonar el repositorio.
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone 'https://github.com/Eroscardenas/inventario-refacciones.git'
 ```
 
 Entrar al proyecto.
@@ -195,7 +157,7 @@ Entrar al proyecto.
 cd inventario-refacciones
 ```
 
-Levantar toda la aplicación.
+Levantar todo.
 
 ```bash
 docker compose up --build
@@ -207,17 +169,17 @@ docker compose up --build
 
 Una vez iniciados los contenedores estarán disponibles:
 
-| Servicio | Dirección |
-|----------|-----------|
-| Frontend | http://localhost:4200 |
-| Backend | http://localhost:3000/api |
+| Servicio        | Dirección                             |
+|---------------- |---------------------------------------|
+| Frontend        | http://localhost:4200                 |
+| Backend         | http://localhost:3000/api             |
 | API Refacciones | http://localhost:3000/api/refacciones |
 
 ---
 
-# Desarrollo sin Docker
+## Levantar proyecto sin Docker
 
-## Backend
+### Backend
 
 ```bash
 cd backend
@@ -225,7 +187,7 @@ npm install
 npm run start:dev
 ```
 
-## Frontend
+### Frontend
 
 ```bash
 cd frontend
@@ -253,29 +215,7 @@ DB_DATABASE=inventario_refacciones
 
 Cuando la aplicación se ejecuta mediante Docker Compose estas variables son configuradas automáticamente.
 
----
 
-# Estructura del proyecto
-
-```text
-inventario-refacciones
-│
-├── backend
-│   ├── src
-│   ├── Dockerfile
-│   └── .dockerignore
-│
-├── frontend
-│   ├── src
-│   ├── Dockerfile
-│   └── .dockerignore
-│
-├── docker-compose.yaml
-│
-└── README.md
-```
-
----
 
 # Mejoras adicionales
 
@@ -289,7 +229,6 @@ Entre las mejoras consideradas se encuentran:
 - Autocompletado de categorías utilizando las categorías previamente registradas.
 - Catálogo independiente de categorías para evitar duplicados.
 - Iconografía profesional utilizando Lucide Angular.
-- Confirmaciones visuales mediante diálogos personalizados en sustitución de ventanas nativas.
 - Ordenamiento y paginación del inventario.
 - Historial de movimientos de entrada y salida.
 - Gestión de proveedores.
@@ -300,8 +239,6 @@ Entre las mejoras consideradas se encuentran:
 
 ---
 
-# Autor
+## Autor
 
-**Eros Cárdenas**
-
-Prueba técnica desarrollada utilizando Angular, NestJS, PostgreSQL y Docker.
+**Esaú Cárdenas             ---     RacoonDev**
